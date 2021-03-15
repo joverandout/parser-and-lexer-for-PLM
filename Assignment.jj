@@ -1,29 +1,36 @@
+options {
+        STATIC = false;
+}
 PARSER_BEGIN(Assignment)
 
 public class Assignment{
 
-  boolean moreThanOneMainFunc = false;
+  Boolean moreThanOneMainFunc = false;
   //Hashtable<String, 
 
   public static void main(String args [])   {
    
     Assignment parser = new Assignment(System.in);
    
-   }
+  }
    
 }
 
 PARSER_END(Assignment)
 
 
+TOKEN:
+{
+  <MAIN : "MAIN">
+}
+
 TOKEN : { < DIGIT : (["0"-"9"])+ >
         | < PLUS : "+" >
         | < MULTIPLY : "*" >
         | < DEFINITION : "DEF" >
-        | < PARAMATER : (["a"-"z"])+ >
+        | < PARAMETER : (["a"-"z"])+ >
         | < LINEEND : "\n" >
         | < FUNC : (["A"-"Z"])+ >
-        | < MAIN : "MAIN">
         | < SEMICOLON : ";" >
         | < SPACE : " " >
         | < OPENBRAC : "(" >
@@ -51,13 +58,16 @@ void bracTwo(): {}
   <LINEEND>
 }
 
-void Start():{}
+void Start():{
+  Token firstToken = null;
+  Token secondToken = null;
+}
 {
   (
     try {<DEFINITION>} catch (ParseException e) {throw new ParseException("Missing keyword DEF");}
     try {<SPACE>} catch (ParseException e) {throw new ParseException("Missing function name after keyword DEF");}
     (
-      t1 = <MAIN>
+      firstToken = <MAIN>
       {
         moreThanOneMainFunc = true;
       }
@@ -65,13 +75,16 @@ void Start():{}
       checkmain()
       
       |
-      t2 = <FUNC> {}        
+      secondToken = <FUNC> {}        
     )
   )*
   <EOF>
 }
 
-void checkfunction(): {}
+void checkfunction():
+{
+  Token parameterVaraible;
+}
 {
   bracOne()
   parameterVaraible = <PARAMETER>

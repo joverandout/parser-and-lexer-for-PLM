@@ -9,21 +9,21 @@ public interface AssignmentConstants {
   /** End of File. */
   int EOF = 0;
   /** RegularExpression Id. */
-  int DIGIT = 1;
+  int MAIN = 1;
   /** RegularExpression Id. */
-  int PLUS = 2;
+  int DIGIT = 2;
   /** RegularExpression Id. */
-  int MULTIPLY = 3;
+  int PLUS = 3;
   /** RegularExpression Id. */
-  int DEFINITION = 4;
+  int MULTIPLY = 4;
   /** RegularExpression Id. */
-  int PARAMATER = 5;
+  int DEFINITION = 5;
   /** RegularExpression Id. */
-  int LINEEND = 6;
+  int PARAMETER = 6;
   /** RegularExpression Id. */
-  int FUNC = 7;
+  int LINEEND = 7;
   /** RegularExpression Id. */
-  int MAIN = 8;
+  int FUNC = 8;
   /** RegularExpression Id. */
   int SEMICOLON = 9;
   /** RegularExpression Id. */
@@ -43,14 +43,14 @@ public interface AssignmentConstants {
   /** Literal token values. */
   String[] tokenImage = {
     "<EOF>",
+    "\"MAIN\"",
     "<DIGIT>",
     "\"+\"",
     "\"*\"",
     "\"DEF\"",
-    "<PARAMATER>",
+    "<PARAMETER>",
     "\"\\n\"",
     "<FUNC>",
-    "\"MAIN\"",
     "\";\"",
     "\" \"",
     "\"(\"",
