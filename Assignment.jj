@@ -1,0 +1,101 @@
+PARSER_BEGIN(Assignment)
+
+public class Assignment{
+
+  boolean moreThanOneMainFunc = false;
+  //Hashtable<String, 
+
+  public static void main(String args [])   {
+   
+    Assignment parser = new Assignment(System.in);
+   
+   }
+   
+}
+
+PARSER_END(Assignment)
+
+
+TOKEN : { < DIGIT : (["0"-"9"])+ >
+        | < PLUS : "+" >
+        | < MULTIPLY : "*" >
+        | < DEFINITION : "DEF" >
+        | < PARAMATER : (["a"-"z"])+ >
+        | < LINEEND : "\n" >
+        | < FUNC : (["A"-"Z"])+ >
+        | < MAIN : "MAIN">
+        | < SEMICOLON : ";" >
+        | < SPACE : " " >
+        | < OPENBRAC : "(" >
+        | < CLOSEBRAC : ")" >
+        | < OPENCURLYBRAC : "{" >
+        | < CLOSECURLYBRAC : "}" >
+        }
+
+
+//brac one is used at the beginning of a function as a valid 
+void bracOne(): {}
+{
+  <SPACE>
+  <OPENCURLYBRAC>
+  <SPACE>
+}
+
+//brac two is used at the end of a function as a valid function always ends "} ;\n"
+void bracTwo(): {}
+{
+  <SPACE>
+  <CLOSECURLYBRAC>
+  <SPACE>
+  <SEMICOLON>
+  <LINEEND>
+}
+
+void Start():{}
+{
+  (
+    try {<DEFINITION>} catch (ParseException e) {throw new ParseException("Missing keyword DEF");}
+    try {<SPACE>} catch (ParseException e) {throw new ParseException("Missing function name after keyword DEF");}
+    (
+      t1 = <MAIN>
+      {
+        moreThanOneMainFunc = true;
+      }
+
+      checkmain()
+      
+      |
+      t2 = <FUNC> {}        
+    )
+  )*
+  <EOF>
+}
+
+void checkfunction(): {}
+{
+  bracOne()
+  parameterVaraible = <PARAMETER>
+  //EVALUATE THE FUNCTION HERE
+  <SPACE>
+  //FURTHER EVALUATION
+  bracTwo()
+}
+
+void checkmain(): {}
+{
+  {
+    if(moreThanOneMainFunc){
+      System.err.println("Multiple MAIN functions defined");
+      System.out.print("FAIL");
+    }
+  }
+  bracOne()
+  //EVALUATE THE FUNCTION HERE
+  <SPACE>
+  //FURTHER EVALUATION
+  bracTwo()
+}
+
+
+
+
