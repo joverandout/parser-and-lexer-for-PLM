@@ -1,0 +1,3 @@
+DEF MAIN { 1+ADDFOUR(2+TIMESFIVE(3)) } ;
+DEF ADDFOUR x { x+4 } ;
+DEF TIMESFIVE x { x*5 } ;
