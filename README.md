@@ -3,7 +3,7 @@ A parser and lexer for a PLM programming language in javacc.
 
 To run compile the java compiler with the java compiler compiler command:
 ```
-javacc Assignment.javacc
+javacc Assignment.jj
 ```
 Then compile with the java compiler
 ```
