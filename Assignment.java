@@ -36,11 +36,30 @@ public class Assignment implements AssignmentConstants {
 
     if(!parser.divergance){
       String decomposedFunction = decomposeFunction(parser, "MAIN", "");
+      if(countbracs(decomposedFunction)==-1){
+        decomposedFunction += ")";
+      }
+      else if(countbracs(decomposedFunction)==1){
+        decomposedFunction = "(" + decomposedFunction;
+      }
+      System.out.println(decomposedFunction);
       int answer = evaluateDecomposedFunction(decomposedFunction);
       System.out.println(answer);
     }
 
     System.exit(0);
+  }
+
+  public static int countbracs(String decom){
+    int[] count = new int[2];
+    char [] chars = decom.toCharArray();
+    for(char c : chars){
+      if(c == '(') count[0]++;
+      else if(c==')') count[1]++;
+    }
+    if(count[0]>count[1]) return -1;
+    else if(count[1]>count[0]) return 1;
+    return 0;
   }
 
   public static int evaluateDecomposedFunction(String decomposedFunc){
@@ -306,6 +325,9 @@ public class Assignment implements AssignmentConstants {
                                          displayError("Invalid or missing function name", line);
         } catch (TokenMgrError e) {
                                                                                                                            displayError("Invalid character in function name", line);
+        }
+        if(functionNames.contains(secondToken.image.toString())){
+          displayError("Function " + secondToken.image.toString() + " defined more than once", line);
         }
         functionNames.add(secondToken.image.toString());
         currFunc = secondToken.image.toString();
