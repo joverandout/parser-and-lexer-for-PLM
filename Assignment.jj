@@ -9,16 +9,24 @@ import java.util.*;
 public class Assignment{
 
   int numberOfMains = 0;
+
+  //Arraylists are used to keep track of the functions that have been called
+  //and the functions that have been defined. Descrepencies here can be used
+  //to find certain types of errors
   ArrayList<String> functionCalls = new ArrayList<String>();
   ArrayList<String> functionNames = new ArrayList<String>();
 
+  //the current function defined on the line we're on
   String currFunc = "";
 
   int numberOfBracs = 0;
 
+  //holds all functions as the key and the function body as an arraylist
   HashMap<String, ArrayList<String>> allFuncs = new HashMap<String, ArrayList<String>>();
 
+
   Boolean divergance = false;
+  //the lines main is defined on
   ArrayList<Integer> mainLineNos = new ArrayList<Integer>();
   int line = 1;
 
@@ -28,33 +36,42 @@ public class Assignment{
 
   public static void main(String args [])  throws ParseException, TokenMgrError {
    
+    //parse the PLM program
     Assignment parser = new Assignment(System.in);
 
     try {
+      //try to start the parser
       parser.Start();
     } catch (ParseException e) {
+      //if an error is found print the appropriate message
       displayError(e.getMessage(), parser.line);
     }
     catch (TokenMgrError e) {
+      //catch any invalid characters in the message
       displayError("Invalid character in function", parser.line);
     }
     
     if(!parser.divergance){
+      //if no divergence is detected decompose the function
       String decomposedFunction = decomposeFunction(parser, "MAIN", "");
       if(countbracs(decomposedFunction)==-1){
         decomposedFunction += ")";
       }
+      //otherwise count the brackets and decompose the function
       else if(countbracs(decomposedFunction)==1){
         decomposedFunction = "(" + decomposedFunction;
       }
-      System.out.println(decomposedFunction);
+      //evaluate the answer of the now decomposed function using infix
       int answer = evaluateDecomposedFunction(decomposedFunction);
+      //print the answer
       System.out.println(answer);
     }
 
     System.exit(0);
   }
 
+  //This counts the brackets of the code in case the system makes a mistake
+  //If so it will add one to the end or the beginning if there is a mismatch
   public static int countbracs(String decom){
     int[] count = new int[2];
     char [] chars = decom.toCharArray();
@@ -67,15 +84,21 @@ public class Assignment{
     return 0;
   }
 
+  //turns a string of an expression into an integer result using infix
   public static int evaluateDecomposedFunction(String decomposedFunc){
+    //holds the operators and the operands
     Stack<Integer> operands = new Stack<Integer>();
     Stack<Character> operators = new Stack<Character>();
 
+    //converts to a char array for the algorithm to work
     char[] decomposedFuncChars = decomposedFunc.toCharArray();
     StringBuffer sbuf = new StringBuffer();
     Boolean buffer = false;
 
+    //for each char execute the following
     for(char currChar : decomposedFuncChars ){
+      //if it is a digit then start a string buffer as it may be more
+      //than one character and the whole number needs to be stored
       if(currChar >= '0' && currChar <= '9'){
         if(buffer == false){
           sbuf = new StringBuffer();
@@ -86,33 +109,43 @@ public class Assignment{
           sbuf.append(currChar);
         }
       }
+      //if it is a open bracket then add to the operators stack
       else if(currChar == '('){
         if(buffer){
           buffer = false;
+          //end of the number so push to stack
           operands.push(Integer.parseInt(sbuf.toString()));
         }
         operators.push(currChar);
       }
+      //if it is a close bracket then add to the operators stack
       else if(currChar == ')'){
         if(buffer){
           buffer = false;
+          //end of the number so push to stack
           operands.push(Integer.parseInt(sbuf.toString()));
         }
+        //check if the next operator is an open bracket or not
         while(operators.peek() != '('){
+          //if it isnt then push the calculation of the operation within the brackets
           operands.push(calculateOperation(operators.pop(), operands.pop(), operands.pop()));
         }
+        //remove the latest operator
         operators.pop();
       }
+      //if the char is an operator
       if(currChar == '+' || currChar=='*'){
         if(buffer){
           buffer = false;
+          //update the string buffer stack
           operands.push(Integer.parseInt(sbuf.toString()));
         }
         while(!operators.empty() && precedence(currChar, operators.peek()))
         {
+          //add a new operand of the calculation of this operator if it has a lower priority
           operands.push(calculateOperation(operators.pop(), operands.pop(), operands.pop()));
         }
-
+        //add it to the operators stack
         operators.push(currChar);
 
       }
@@ -121,21 +154,26 @@ public class Assignment{
     while(!operators.empty()){
       operands.push(calculateOperation(operators.pop(), operands.pop(), operands.pop()));
     }
+
+    //return the result
     return operands.pop();
   }
 
+  //checks precedence of operators such as * over +
   public static boolean precedence(char op1, char op2)
   {
     if ((op2 == '(' || op2 == ')') || (op1 == '*' && op2 == '+')) return false;
     return true;
   }
 
+  //calculates a single operation given an operator and two operands
   public static int calculateOperation(char operator, int operand1, int operand2){
     if(operator == '+') return operand1 + operand2;
     if(operator == '*') return operand1 * operand2;
     return 0;
   }
 
+  //displays an error by printing to the correct output
   public static void displayError(String errorMessage, int line) {
     System.out.println("FAIL");
     System.err.println(line);
@@ -143,64 +181,88 @@ public class Assignment{
     System.exit(0);
   }
 
+  //decomposes a function into a sting such by calling on the main and checking the hasmpa for otherwise
+  //function bodies and replacing their name with their operations.
   public static String decomposeFunction(Assignment parser, String function, String parameter) {
+    //stores tkhe function body in an array by geting the current function from the hashmamp
     ArrayList<String> functionBody = parser.allFuncs.get(function);
     String newFunction = "";
     boolean decomposed = false;
 
+    //iterates through the whole funciton body
     for(int i = 0; i < functionBody.size(); i++){
       Boolean isNum = true;
       int a = 0;
+      //trys converting numbers otherwise if not then isNum is set to false as the char isn't a number
       try{a = Integer.parseInt(functionBody.get(i));} catch (NumberFormatException e) {isNum = false;}
       if (isNum == true) newFunction += Integer.parseInt(functionBody.get(i));
+      //if the character is a number then append it to the new function by converting it to an integer first.
       else if(isNum == false){
+        //otherwise if it isn't a num check if it is a parameter
         Boolean isParam = true;
         char[] chars = functionBody.get(i).toCharArray();
         for(int j =0; j < chars.length; j++){
+          //check if it's a parameter by ensuring each letter is a lowercase
           if(Character.isLowerCase(chars[j]) == false){
             isParam = false;
+            //otherwise set isparam to false
           }
         }
         if(isParam == true){
           while (true) {
+            //if is param is true get it's value and replace it out
             String func = getFunctionOutOfAString(parameter, 0, parameter.length(), false, false);
             if (func != null) {
               String funcCall = "";
               for (int k = 0; k < func.length(); k++) {
                   if (Character.toString(func.charAt(k)).equals("(")) {
-                      k = 999;
+                      k = 10000000;
                       break;
                   }
+                  //add the brackets to the function
                   funcCall += func.charAt(k);
               }
+              //get the funciton parameters
               String funcParams = "";
+              //count the open and clsoed brackets
               int openBrackets = 0;
               int closedBrackets = 0;
+
+
               char [] chars3 = func.toCharArray();
               for (int k = 0; k < chars3.length; k++) {
                   if (chars3[k] == '(') {
-                      openBrackets++;
+                    //if an open bracket is encountered increase the count
+                    openBrackets++;
                   } else if (chars3[k] == ')') {
-                      closedBrackets++;
+                    //if a clsoed bracket is encountered increase the count
+                    closedBrackets++;
                   }
 
+                  //if open brackets outnumber closed brackets then we are inside the bracket call
+                  //and so append the function parameters
                   if (openBrackets > closedBrackets) {
                       funcParams += func.charAt(k);
                   }
               }
+              //place the bracket at the start of the call and after and then recall decomposedFunction
+              //recursively to evaluate the contents of the brackets and append that to the function params
               funcParams = funcParams.substring(1);
               String call = "(" + decomposeFunction(parser, funcCall, funcParams) + ")";
               parameter = parameter.replace(func, call);
             } else {break;}
           }
+          //add the new parameter to the new function
           newFunction += "(" + parameter + ")";
         }
         else if(functionBody.get(i) == "+" || functionBody.get(i) == "*"){
           newFunction += functionBody.get(i);
         }
         else{
+          //otherwise if it isn't a parameter or a number check if it is a function
           char[] tempChars = functionBody.get(i).toCharArray();
           if(Character.isUpperCase(tempChars[0])){
+            //check it's furst character is upper case
             String funcCall = "";
             for (int k = 0; k < functionBody.get(i).length(); k++) {
                 if (tempChars[k] == '(') {
@@ -209,11 +271,16 @@ public class Assignment{
                 }
                 funcCall += tempChars[k];
             }
+            //reduce the function body to get the function parameters
             String funcParams = reduceFunctionBody(functionBody.get(i));
+            //found paramter swaps the parameter out for its value using the other tabels and the hashmap
             String Foundparameter = getFunctionOutOfAString(funcParams, 0, funcParams.length(), false, true);
             if (Foundparameter != null) {
-                funcParams = funcParams.replace(Foundparameter, parameter);
+              //if we find the parameter replace it in the expression
+              funcParams = funcParams.replace(Foundparameter, parameter);
             }
+            //place the bracket at the start of the call and after and then recall decomposedFunction
+            //recursively to evaluate the contents of the brackets and append that to the function params
             String call = decomposeFunction(parser, funcCall, funcParams);
             newFunction += "(" + call + ")";
           }
